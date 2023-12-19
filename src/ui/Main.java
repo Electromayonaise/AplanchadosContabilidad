@@ -26,20 +26,24 @@ public class Main {
      */
     private static void createAndShowGUI() {
         // Create the main JFrame
-        JFrame frame = new JFrame("Task Manager");
+        JFrame frame = new JFrame("Contabilidad Aplanchados");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1750, 800);
 
         // Create a container panel with CardLayout for managing different panels
         JPanel containerPanel = new JPanel(new CardLayout());
 
-        // Create and add the GeneralMenuPanel to the container
-        GeneralMenuPanel generalMenuPanel = new GeneralMenuPanel(containerPanel);
-        containerPanel.add(generalMenuPanel, "GeneralMenu");
+        // Create and add the frontDate selector to the container
+        FrontDateSelector frontDateSelector = new FrontDateSelector(containerPanel);
+        containerPanel.add(frontDateSelector, "FrontDateSelector");
 
-        // Create and add the TasksPanel to the container
-        TasksPanel tasksPanel = new TasksPanel(containerPanel);
-        containerPanel.add(tasksPanel, "TasksPanel");
+        // Create and add the IntermediaryDataPanel to the container
+        IntermediaryDataPanel intermediaryDataPanel = new IntermediaryDataPanel(containerPanel);
+        containerPanel.add(intermediaryDataPanel, "IntermediaryDataPanel");
+
+        // Create and add the DataPanel to the container
+        DataPanel dataPanel = new DataPanel(containerPanel);
+        containerPanel.add(dataPanel, "DataPanel");
 
         // Add the container panel to the JFrame's content pane
         frame.getContentPane().add(containerPanel);

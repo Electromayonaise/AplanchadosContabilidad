@@ -241,7 +241,7 @@ public class Controller {
      *
      * @return List of attributes for non-prioritized tasks.
      */
-    public ArrayList<ArrayList<String>> getNonPrioritizedTasksAttributes(){
+    public ArrayList<ArrayList<String>> getCreditSalesAttributes(){
 
         ArrayList<ArrayList<String>> list=new ArrayList<>();
         for(Task task: (DoublyLinkedList<Task>) queue){
@@ -255,7 +255,7 @@ public class Controller {
      *
      * @return List of attributes for prioritized tasks.
      */
-    public ArrayList<ArrayList<String>> getPrioritizedTasksAttributes(){
+    public ArrayList<ArrayList<String>> getInmediateSalesAttributes(){
         ArrayList<ArrayList<String>> list=new ArrayList<>();
         ArrayList<Task> heapList=((MaxHeap<Task>)priorityQueue).getElements();
         ArrayList<Task> copy=  copyTasks(heapList);

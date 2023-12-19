@@ -37,7 +37,7 @@ public class BasePanel extends JPanel {
         returnButton = createStyledButton("Return to Menu", new Color(255, 175, 175));
         returnButton.addActionListener(e -> {
             CardLayout cardLayout = (CardLayout) containerPanel.getLayout();
-            cardLayout.show(containerPanel, "GeneralMenu");
+            cardLayout.show(containerPanel, "GeneralMenuPanel");
         });
 
         add(returnButton, gbc);

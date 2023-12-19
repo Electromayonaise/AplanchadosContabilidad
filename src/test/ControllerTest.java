@@ -46,8 +46,8 @@ public class ControllerTest {
             Assertions.assertFalse(controller.addTask("prioritizedTask"+i,"description"+i,i));
         }
         System.out.println("A");
-        ArrayList<ArrayList<String>> prioritizedTasks=controller.getPrioritizedTasksAttributes();
-        ArrayList<ArrayList<String>> nonPrioritizedTasks= controller.getNonPrioritizedTasksAttributes();
+        ArrayList<ArrayList<String>> prioritizedTasks=controller.getInmediateSalesAttributes();
+        ArrayList<ArrayList<String>> nonPrioritizedTasks= controller.getCreditSalesAttributes();
 
         System.out.println(prioritizedTasks+"");
 
@@ -63,8 +63,8 @@ public class ControllerTest {
             Assertions.assertFalse(controller.removeTask("nonPrioritizedTask"+i));
 
         }
-        ArrayList<ArrayList<String>> prioritizedTasks=controller.getPrioritizedTasksAttributes();
-        ArrayList<ArrayList<String>> nonPrioritizedTasks= controller.getNonPrioritizedTasksAttributes();
+        ArrayList<ArrayList<String>> prioritizedTasks=controller.getInmediateSalesAttributes();
+        ArrayList<ArrayList<String>> nonPrioritizedTasks= controller.getCreditSalesAttributes();
 
         System.out.println(prioritizedTasks+"");
         System.out.println(nonPrioritizedTasks);
@@ -121,8 +121,8 @@ public class ControllerTest {
 
     }
     void printTasks(){
-        ArrayList<ArrayList<String>> prioritizedTasks=controller.getPrioritizedTasksAttributes();
-        ArrayList<ArrayList<String>> nonPrioritizedTasks= controller.getNonPrioritizedTasksAttributes();
+        ArrayList<ArrayList<String>> prioritizedTasks=controller.getInmediateSalesAttributes();
+        ArrayList<ArrayList<String>> nonPrioritizedTasks= controller.getCreditSalesAttributes();
 
         System.out.println(prioritizedTasks+"");
         System.out.println(nonPrioritizedTasks);

@@ -1,16 +1,13 @@
 package ui;
 
-import javax.swing.*;
-import java.awt.*;
-
 import model.ArrayList;
 import model.Controller;
 
-/**
- * The TasksPanel class represents a panel for managing tasks in the Task Manager application.
- * It provides features for displaying, adding, modifying, and deleting tasks.
- */
-public class TasksPanel extends BasePanel {
+import javax.swing.*;
+import java.awt.*;
+
+public class OtherIncomesPanel extends BasePanel {
+
     private final Controller controller;
 
     private final Color myRed = new Color(255, 175, 175);
@@ -24,25 +21,25 @@ public class TasksPanel extends BasePanel {
     private boolean displayByPriority = true; // Track the current display mode
 
     /**
-     * Constructs a TasksPanel with a reference to the container panel.
+     * Constructs a DataPanel with a reference to the container panel.
      *
-     * @param containerPanel The container panel that holds this TasksPanel.
+     * @param containerPanel The container panel that holds this DataPanel.
      */
-    public TasksPanel(JPanel containerPanel) {
+    public OtherIncomesPanel(JPanel containerPanel) {
         super(containerPanel);
         controller = Controller.getInstance();
         initUI();
     }
 
     /**
-     * Initializes the UI components of the TasksPanel.
+     * Initializes the UI components of the DataPanel.
      */
     private void initUI() {
         setLayout(new BorderLayout()); // Use BorderLayout for better element placement
         setOpaque(false); // Make the panel transparent
 
         // Create a title label with red color and centered
-        JLabel titleLabel = new JLabel("Tasks Panel");
+        JLabel titleLabel = new JLabel("Data Panel");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(myRed);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -135,7 +132,7 @@ public class TasksPanel extends BasePanel {
             if (selectedIndex != -1) {
                 String selectedTaskName = taskNameListModel.getElementAt(selectedIndex);
                 String[] options = {"Modify Name", "Modify Priority", "Modify Description"};
-                int choice = JOptionPane.showOptionDialog(TasksPanel.this, "What would you like to modify?", "Modify Task", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                int choice = JOptionPane.showOptionDialog(OtherIncomesPanel.this, "What would you like to modify?", "Modify Task", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
                 if (choice == 0) {
                     // Modify Name
@@ -149,7 +146,7 @@ public class TasksPanel extends BasePanel {
                 } else if (choice == 1) {
                     // Modify Priority
                     JSlider slider = getjSlider();
-                    JOptionPane.showMessageDialog(TasksPanel.this, slider, "Select new Task Priority", JOptionPane.QUESTION_MESSAGE);
+                    JOptionPane.showMessageDialog(OtherIncomesPanel.this, slider, "Select new Task Priority", JOptionPane.QUESTION_MESSAGE);
                     String modifiedPriority = String.valueOf(slider.getValue());
                     // Update the task priority in the controller
                     controller.modifyTask(selectedTaskName, 3, modifiedPriority);
@@ -163,11 +160,11 @@ public class TasksPanel extends BasePanel {
                         // No need to update the task name in the taskNameListModel for description modification
                     }
                 }
-                JOptionPane.showMessageDialog(TasksPanel.this, "Task modified successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(OtherIncomesPanel.this, "Task modified successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 // Refresh the display panel to update the displayed tasks
                 refreshDisplay();
             } else {
-                JOptionPane.showMessageDialog(TasksPanel.this, "Please select a task first.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(OtherIncomesPanel.this, "Please select a task first.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -182,9 +179,9 @@ public class TasksPanel extends BasePanel {
                 taskListModel.removeElementAt(selectedIndex);
                 // Remove the task from the controller
                 controller.removeTask(selectedTaskName);
-                JOptionPane.showMessageDialog(TasksPanel.this, "Task deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(OtherIncomesPanel.this, "Task deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(TasksPanel.this, "Please select a task first.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(OtherIncomesPanel.this, "Please select a task first.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -202,16 +199,16 @@ public class TasksPanel extends BasePanel {
             String taskName = JOptionPane.showInputDialog("Enter Task Name");
             if (taskName != null && !taskName.isEmpty()) {
                 JSlider slider = getjSlider();
-                JOptionPane.showMessageDialog(TasksPanel.this, slider, "Select Task Priority", JOptionPane.QUESTION_MESSAGE);
+                JOptionPane.showMessageDialog(OtherIncomesPanel.this, slider, "Select Task Priority", JOptionPane.QUESTION_MESSAGE);
                 int taskPriority = slider.getValue();
                 String taskDescription = JOptionPane.showInputDialog("Enter Task Description");
                 if (taskDescription != null) {
                     boolean success = controller.addTask(taskName, taskDescription, taskPriority);
                     if (success) {
                         refreshDisplay();
-                        JOptionPane.showMessageDialog(TasksPanel.this, "Task added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(OtherIncomesPanel.this, "Task added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(TasksPanel.this, "Task with the same name already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(OtherIncomesPanel.this, "Task with the same name already exists.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -247,10 +244,10 @@ public class TasksPanel extends BasePanel {
             boolean undo = controller.undo();
             if(undo){
                 refreshDisplay();
-                JOptionPane.showMessageDialog(TasksPanel.this, "Undo successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(OtherIncomesPanel.this, "Undo successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
             }else{
-                JOptionPane.showMessageDialog(TasksPanel.this, "No undo possible", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(OtherIncomesPanel.this, "No undo possible", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -288,10 +285,10 @@ public class TasksPanel extends BasePanel {
         // Get the tasks from the controller based on the current display mode
         ArrayList<ArrayList<String>> tasks;
         if (displayByPriority) {
-            tasks = controller.getPrioritizedTasksAttributes();
+            tasks = controller.getInmediateSalesAttributes();
 
         } else {
-            tasks = controller.getNonPrioritizedTasksAttributes();
+            tasks = controller.getCreditSalesAttributes();
         }
 
         for (ArrayList<String> task : tasks) {
@@ -313,9 +310,9 @@ public class TasksPanel extends BasePanel {
      */
     private ArrayList<ArrayList<String>> fetchTasks(boolean byPriority) {
         if (byPriority) {
-            return controller.getPrioritizedTasksAttributes();
+            return controller.getInmediateSalesAttributes();
         } else {
-            return controller.getNonPrioritizedTasksAttributes();
+            return controller.getCreditSalesAttributes();
         }
     }
 
@@ -344,5 +341,4 @@ public class TasksPanel extends BasePanel {
             }
         }
     }
-
 }

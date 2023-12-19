@@ -10,7 +10,7 @@
 
 ### "Entradas" Subheaders
 
-- Ventas de contado: Compuestas por Documento, Detalle, Valor, y Medio de pago
+- Ventas de contado: Compuestas por Documento, Detalle, Valor, Medio de pago, y Nombre del cliente
 - Ventas a crédito: Compuestas por Documento, Detalle, Valor, y Nombre del cliente
 - Total de ventas de contado: Sumatoria de todas las ventas de contado, se dividen entre efectivo y tarjeta
 - Total de ventas a crédito: Sumatoria de todas las ventas a crédito

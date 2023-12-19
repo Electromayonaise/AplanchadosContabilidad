@@ -11,13 +11,16 @@ import java.net.URISyntaxException;
  */
 public class GeneralMenuPanel extends BasePanel {
 
+    public String date;
+
     /**
      * Constructs a GeneralMenuPanel.
      *
      * @param containerPanel the container panel for managing card layout
      */
-    public GeneralMenuPanel(JPanel containerPanel) {
+    public GeneralMenuPanel(JPanel containerPanel, String date) {
         super(containerPanel);
+        this.date = date;
         initUI();
     }
 
@@ -29,7 +32,7 @@ public class GeneralMenuPanel extends BasePanel {
         Color myRed = new Color(255, 175, 175);
 
         // Create a JLabel for the title
-        JLabel titleLabel = new JLabel("TASK MANAGER");
+        JLabel titleLabel = new JLabel("CONTABILIDAD APLANCHADOS \n" + this.date);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
         titleLabel.setForeground(myRed); // Soft red color
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -39,19 +42,41 @@ public class GeneralMenuPanel extends BasePanel {
         JPanel buttonPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(30, 30, 30, 30);
 
-        // Create a button for tasks
-        JButton tasksButton = createStyledButton("Tasks", myRed);
-        tasksButton.addActionListener(e -> showPanel());
+        // Create a button for data
+        JButton dataButton = createStyledButton("Ingresar Datos", myRed);
+        dataButton.addActionListener(e -> showPanel());
         gbc.gridx = 0;
         gbc.gridy = 0;
-        buttonPanel.add(tasksButton, gbc);
+        buttonPanel.add(dataButton, gbc);
+
+        // Create a button for day resume
+        JButton dayResumeButton = createStyledButton("Resumen del día", myRed);
+        dayResumeButton.addActionListener(e -> showPanel());
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        buttonPanel.add(dayResumeButton, gbc);
+
+        // Create a button for sells resume
+        JButton sellsResumeButton = createStyledButton("Resumen de ventas", myRed);
+        sellsResumeButton.addActionListener(e -> showPanel());
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        buttonPanel.add(sellsResumeButton, gbc);
+
+        // Create a button for saving the data of the day to an Excel file
+        JButton saveToExcelButton = createStyledButton("Guardar datos a excel", myRed);
+        saveToExcelButton.addActionListener(e -> showPanel());
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        buttonPanel.add(saveToExcelButton, gbc);
 
         // Create a button for closing the program
-        JButton closeButton = createStyledButton("Close Program", myRed);
+        JButton closeButton = createStyledButton("Cerrar", Color.RED);
         closeButton.addActionListener(e -> System.exit(0));
-        gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
         buttonPanel.add(closeButton, gbc);
 
         // Create a hyperlink-like button for Documentation
@@ -97,6 +122,11 @@ public class GeneralMenuPanel extends BasePanel {
      */
     private void showPanel() {
         CardLayout cardLayout = (CardLayout) containerPanel.getLayout();
-        cardLayout.show(containerPanel, "TasksPanel");
+        cardLayout.show(containerPanel, "IntermediaryDataPanel");
     }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
 }
