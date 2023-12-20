@@ -3,6 +3,7 @@ package ui;
 import model.ArrayList;
 import model.Controller;
 import model.CreditSales;
+import model.InmediateSales;
 
 import javax.swing.*;
 import java.awt.*;
@@ -140,41 +141,135 @@ public class EntriesPanel extends BasePanel {
         modifyButton.addActionListener(e -> {
             int selectedIndex = salesList.getSelectedIndex();
             if (selectedIndex != -1) {
-                String selectedTaskName = entriesIDListModel.getElementAt(selectedIndex);
-                String[] options = {"Modify Name", "Modify Priority", "Modify Description"};
-                int choice = JOptionPane.showOptionDialog(EntriesPanel.this, "What would you like to modify?", "Modify Task", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                String selectedEntryID = entriesIDListModel.getElementAt(selectedIndex);
+                // different options wether the entry is a credit sale or a inmediate sale
+                if (displayInmediate) {
+                    CreditSales selectedEntry = controller.getCreditSale(selectedEntryID);
+                    String[] options = { "Modificar Detalle", "Modificar Documento", "Modificar Valor", "Modificar Nombre del cliente", "Modificar ID", "Modificar Prioridad"};
+                    int choice = JOptionPane.showOptionDialog(EntriesPanel.this, "Que desea modificar?", "Modificar Ingreso", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-                if (choice == 0) {
-                    // Modify Name
-                    String modifiedName = JOptionPane.showInputDialog("Modify Task Name", selectedTaskName);
-                    if (modifiedName != null && !modifiedName.isEmpty()) {
-                        // Update the task name in the controller
-                        controller.modifyTask(selectedTaskName, 1, modifiedName);
-                        // Update the task name in the taskNameListModel
-                        entriesIDListModel.setElementAt(modifiedName, selectedIndex);
+                    if (choice == 0) {
+                        // Modify Detail
+                        String modifiedDetail = JOptionPane.showInputDialog("Modificar Detalle", selectedEntry.getDetail());
+                        if (modifiedDetail != null && !modifiedDetail.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyInmediateSale(selectedEntryID, 1, modifiedDetail);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedDetail, selectedIndex);
+                        }
+                    } else if (choice == 1) {
+                        // Modify Document
+                        String modifiedDocument = JOptionPane.showInputDialog("Modificar Documento", selectedEntry.getDocument());
+                        if (modifiedDocument != null && !modifiedDocument.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyInmediateSale(selectedEntryID, 2, modifiedDocument);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedDocument, selectedIndex);
+                        }
+                    } else if (choice == 2) {
+                        // Modify Value
+                        String modifiedValue = JOptionPane.showInputDialog("Modificar Valor", selectedEntry.getValue());
+                        if (modifiedValue != null && !modifiedValue.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyInmediateSale(selectedEntryID, 3, modifiedValue);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedValue, selectedIndex);
+                        }
+                    } else if (choice == 3) {
+                        // Modify Client Name
+                        String modifiedClientName = JOptionPane.showInputDialog("Modificar Nombre del cliente", selectedEntry.getClientName());
+                        if (modifiedClientName != null && !modifiedClientName.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyInmediateSale(selectedEntryID, 4, modifiedClientName);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedClientName, selectedIndex);
+                        }
+
+                    } else if (choice ==4){
+                        // Modify ID
+                        String modifiedID = JOptionPane.showInputDialog("Modificar ID", selectedEntry.getID());
+                        if (modifiedID != null && !modifiedID.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyInmediateSale(selectedEntryID, 5, modifiedID);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedID, selectedIndex);
+                        }
+                    } else if (choice == 5){
+                        // Modify Priority
+                        String modifiedPriority = JOptionPane.showInputDialog("Modificar Prioridad", selectedEntry.getPriorityLevel());
+                        if (modifiedPriority != null && !modifiedPriority.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyInmediateSale(selectedEntryID, 6, modifiedPriority);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedPriority, selectedIndex);
+                        }
                     }
-                } else if (choice == 1) {
-                    // Modify Priority
-                    JSlider slider = getjSlider();
-                    JOptionPane.showMessageDialog(EntriesPanel.this, slider, "Select new Task Priority", JOptionPane.QUESTION_MESSAGE);
-                    String modifiedPriority = String.valueOf(slider.getValue());
-                    // Update the task priority in the controller
-                    controller.modifyTask(selectedTaskName, 3, modifiedPriority);
-                    // No need to update the task name in the taskNameListModel for priority modification
-                } else if (choice == 2) {
-                    // Modify Description
-                    String modifiedDescription = JOptionPane.showInputDialog("Modify Task Description", selectedTaskName);
-                    if (modifiedDescription != null) {
-                        // Update the task description in the controller
-                        controller.modifyTask(selectedTaskName, 2, modifiedDescription);
-                        // No need to update the task name in the taskNameListModel for description modification
+
+                } else {
+                    InmediateSales selectedEntry = controller.getInmediateSale(selectedEntryID);
+                    String[] options = {"Modificar Detalle", "Modificar Documento", "Modificar Valor", "Modificar Nombre del cliente", "Modificar ID", "Modificar Medio de pago"};
+                    int choice = JOptionPane.showOptionDialog(EntriesPanel.this, "Que desea modificar?", "Modificar Ingreso", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+                    if (choice == 0) {
+                        // Modify Detail
+                        String modifiedDetail = JOptionPane.showInputDialog("Modificar Detalle", selectedEntry.getDetail());
+                        if (modifiedDetail != null && !modifiedDetail.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyCreditSale(selectedEntryID, 1, modifiedDetail);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedDetail, selectedIndex);
+                        }
+                    } else if (choice == 1) {
+                        // Modify Document
+                        String modifiedDocument = JOptionPane.showInputDialog("Modificar Documento", selectedEntry.getDocument());
+                        if (modifiedDocument != null && !modifiedDocument.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyCreditSale(selectedEntryID, 2, modifiedDocument);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedDocument, selectedIndex);
+                        }
+                    } else if (choice == 2) {
+                        // Modify Value
+                        String modifiedValue = JOptionPane.showInputDialog("Modificar Valor", selectedEntry.getValue());
+                        if (modifiedValue != null && !modifiedValue.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyCreditSale(selectedEntryID, 3, modifiedValue);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedValue, selectedIndex);
+                        }
+                    } else if (choice == 3) {
+                        // Modify Client Name
+                        String modifiedClientName = JOptionPane.showInputDialog("Modificar Nombre del cliente", selectedEntry.getClientName());
+                        if (modifiedClientName != null && !modifiedClientName.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyCreditSale(selectedEntryID, 4, modifiedClientName);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedClientName, selectedIndex);
+                        }
+                    } else if (choice == 4){
+                        // Modify ID
+                        String modifiedID = JOptionPane.showInputDialog("Modificar ID", selectedEntry.getID());
+                        if (modifiedID != null && !modifiedID.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyCreditSale(selectedEntryID, 5, modifiedID);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedID, selectedIndex);
+                        }
+                    } else if (choice == 5){
+                        // Modify Cash
+                        String modifiedCash = JOptionPane.showInputDialog("Modificar Medio de pago", selectedEntry.isCash());
+                        if (modifiedCash != null && !modifiedCash.isEmpty()) {
+                            // Update the task name in the controller
+                            controller.modifyCreditSale(selectedEntryID, 6, modifiedCash);
+                            // Update the task name in the taskNameListModel
+                            entriesIDListModel.setElementAt(modifiedCash, selectedIndex);
+                        }
                     }
                 }
-                JOptionPane.showMessageDialog(EntriesPanel.this, "Task modified successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                // Refresh the display panel to update the displayed tasks
-                refreshDisplay();
+
+                JOptionPane.showMessageDialog(EntriesPanel.this, "Ingreso modificado exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(EntriesPanel.this, "Please select a task first.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(EntriesPanel.this, "Porfavor selecciona un ingreso primero.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -183,12 +278,12 @@ public class EntriesPanel extends BasePanel {
         deleteButton.addActionListener(e -> {
             int selectedIndex = salesList.getSelectedIndex();
             if (selectedIndex != -1) {
-                String selectedTaskName = entriesIDListModel.getElementAt(selectedIndex);
+                String selectedSaleID = entriesIDListModel.getElementAt(selectedIndex);
                 // Remove the task from the list models
                 entriesIDListModel.removeElementAt(selectedIndex);
                 entriesListModel.removeElementAt(selectedIndex);
                 // Remove the task from the controller
-                controller.removeTask(selectedTaskName);
+                controller.removeSale(selectedSaleID);
                 JOptionPane.showMessageDialog(EntriesPanel.this, "Ingreso eliminado exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(EntriesPanel.this, "Porfavor selecciona un ingreso primero.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -200,31 +295,95 @@ public class EntriesPanel extends BasePanel {
         buttonPanel.add(deleteButton);
 
         // Create a panel for the "Add Task" button
-        JPanel addTaskPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        addTaskPanel.setOpaque(false);
+        JPanel addSalePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        addSalePanel.setOpaque(false);
 
         // Add Task button
         JButton addButton = createStyledButton("Añadir ingreso", myRed);
         addButton.addActionListener(e -> {
-            String taskName = JOptionPane.showInputDialog("Ingrese el detalle del ingreso");
-            if (taskName != null && !taskName.isEmpty()) {
-                JSlider slider = getjSlider();
-                JOptionPane.showMessageDialog(EntriesPanel.this, slider, "Select Task Priority", JOptionPane.QUESTION_MESSAGE);
-                int taskPriority = slider.getValue();
-                String taskDescription = JOptionPane.showInputDialog("Enter Task Description");
-                if (taskDescription != null) {
-                    boolean success = controller.addTask(taskName, taskDescription, taskPriority);
-                    if (success) {
-                        refreshDisplay();
-                        JOptionPane.showMessageDialog(EntriesPanel.this, "Ingreso añadido exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(EntriesPanel.this, "Task with the same name already exists.", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
+            // Create a panel for the input fields
+            JPanel inputPanel = new JPanel(new GridLayout(0, 1));
+            inputPanel.setOpaque(false);
+
+            // Create input fields
+            JTextField detailField = new JTextField();
+            JTextField documentField = new JTextField();
+            JTextField valueField = new JTextField();
+            JTextField clientNameField = new JTextField();
+
+            // Add the input fields to the input panel
+            inputPanel.add(new JLabel("Detalle:"));
+            inputPanel.add(detailField);
+            inputPanel.add(new JLabel("Documento:"));
+            inputPanel.add(documentField);
+            inputPanel.add(new JLabel("Valor:"));
+            inputPanel.add(valueField);
+            inputPanel.add(new JLabel("Nombre del cliente:"));
+            inputPanel.add(clientNameField);
+
+            // Create a panel for the radio buttons
+            JPanel radioPanel = new JPanel(new GridLayout(0, 1));
+            radioPanel.setOpaque(false);
+
+            // Create radio buttons
+            JRadioButton inmediateButton = new JRadioButton("Contado");
+            JRadioButton creditButton = new JRadioButton("Credito");
+
+            // Add the radio buttons to the radio panel
+            radioPanel.add(inmediateButton);
+            radioPanel.add(creditButton);
+
+            // Create a button group for the radio buttons
+            ButtonGroup buttonGroup = new ButtonGroup();
+            buttonGroup.add(inmediateButton);
+            buttonGroup.add(creditButton);
+
+            // Create a panel for the radio buttons and input fields
+            JPanel inputContainer = new JPanel(new BorderLayout());
+            inputContainer.setOpaque(false);
+
+            // Add the input panel to the input container
+            inputContainer.add(inputPanel, BorderLayout.CENTER);
+
+            // Add the radio panel to the input container
+            inputContainer.add(radioPanel, BorderLayout.SOUTH);
+
+
+            // get selected option
+
+            int result = JOptionPane.showConfirmDialog(EntriesPanel.this, inputContainer, "Añadir ingreso", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            if (result == JOptionPane.OK_OPTION) {
+                // Get the input values
+                String detail = detailField.getText();
+                String document = documentField.getText();
+                String value = valueField.getText();
+                String clientName = clientNameField.getText();
+                String ID = controller.generateID();
+                boolean inmediate = inmediateButton.isSelected();
+
+                if (inmediate) {
+                    // Create a new inmediate sale
+                    boolean cash = JOptionPane.showConfirmDialog(EntriesPanel.this, "Es en efectivo?", "Añadir ingreso", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.YES_OPTION;
+                    controller.addInmediateSale(ID, document, detail, Double.parseDouble(value), cash, clientName);
+                    InmediateSales newInmediateSale = controller.getInmediateSale(ID);
+                    entriesIDListModel.addElement(newInmediateSale.getID());
+                    entriesListModel.addElement(newInmediateSale.getDetail());
+                } else {
+                    controller.addCreditSale(ID, document, detail, Double.parseDouble(value), clientName);
+                    // Create a new credit sale
+                    CreditSales newCreditSale = new CreditSales(detail, document, Double.parseDouble(value), clientName, controller.generateID());
+                    // Add the new task to the task name list model
+                    entriesIDListModel.addElement(newCreditSale.getDetail());
+                    // Add the new task to the task list model
+                    entriesListModel.addElement(newCreditSale.getDetail() + " Priority: " + newCreditSale.getPriorityLevel());
                 }
+
+                JOptionPane.showMessageDialog(EntriesPanel.this, "Ingreso añadido exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
-        addTaskPanel.add(addButton);
+        addSalePanel.add(addButton);
 
         // Create a panel for the "Return to Menu" button
         JPanel returnButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -241,7 +400,7 @@ public class EntriesPanel extends BasePanel {
 
         // Add the button panels to the wrapper panel
         buttonsContainer.add(buttonPanel, BorderLayout.NORTH);
-        buttonsContainer.add(addTaskPanel, BorderLayout.CENTER);
+        buttonsContainer.add(addSalePanel, BorderLayout.CENTER);
         buttonsContainer.add(returnButtonPanel, BorderLayout.SOUTH);
 
         // Add the buttons container to the south
@@ -295,10 +454,10 @@ public class EntriesPanel extends BasePanel {
         // Get the tasks from the controller based on the current display mode
         ArrayList<ArrayList<String>> sales;
         if (displayInmediate) {
-            sales = controller.getInmediateSalesAttributes();
+            sales = controller.getSalesAttributes(true);
 
         } else {
-            sales = controller.getCreditSalesAttributes();
+            sales = controller.getSalesAttributes(false);
         }
 
         for (ArrayList<String> sale : sales) {
@@ -320,9 +479,9 @@ public class EntriesPanel extends BasePanel {
      */
     private ArrayList<ArrayList<String>> fetchSales(boolean byInmediate) {
         if (byInmediate) {
-            return controller.getInmediateSalesAttributes();
+            return controller.getSalesAttributes(true);
         } else {
-            return controller.getCreditSalesAttributes();
+            return controller.getSalesAttributes(false);
         }
     }
 
@@ -330,7 +489,7 @@ public class EntriesPanel extends BasePanel {
      * Refreshes the display panel to update the displayed tasks.
      */
     private void refreshDisplay() {
-        cardLayout.show(displayPanel, displayInmediate ? "Ventas de contado" : "Ventas a crédito");
+        cardLayout.show(displayPanel, displayInmediate ? "Ventas de contado" : "Ventas a credito");
         updateTaskListModels();
     }
 

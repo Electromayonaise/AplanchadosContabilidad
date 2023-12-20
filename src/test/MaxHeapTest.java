@@ -1,7 +1,6 @@
 package test;
 
 import model.MaxHeap;
-import model.Task;
 import org.junit.jupiter.api.Test;
 
 import model.ArrayList;

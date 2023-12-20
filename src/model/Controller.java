@@ -2,6 +2,7 @@ package model;
 
 
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * The Controller class manages tasks in the Task Manager application.
@@ -10,16 +11,16 @@ import java.io.IOException;
 public class Controller {
     // Singleton
     private transient static  Controller instance;
-    private HashTable<String,Task> table;
-    private DoublyLinkedList<Task> queue;
+    private HashTable<String,Entry> table;
+    private DoublyLinkedList<Entry> queue;
 
-    private MaxHeap<Task>priorityQueue;
+    private MaxHeap<Entry>priorityQueue;
 
     private transient static final FileManager fileManager=FileManager.getInstance();
 
-    private DoublyLinkedList<DoublyLinkedList<Task>> doublyStack;
+    private DoublyLinkedList<DoublyLinkedList<Entry>> doublyStack;
 
-    private DoublyLinkedList<MaxHeap<Task>> maxHeapStack;
+    private DoublyLinkedList<MaxHeap<Entry>> maxHeapStack;
 
     /**
      * Private constructor to enforce singleton pattern and initialize data structures.
@@ -72,19 +73,23 @@ public class Controller {
     public void saveToStacks(){
 
         // Cloning the Queue
-        DoublyLinkedList<Task> QueueToClone = getQueue();
-        DoublyLinkedList<Task> queue = new DoublyLinkedList<>();
-        for(Task task : QueueToClone){
-            Task newTask = new Task(task.getTitle(), task.getDescription(), task.getPriorityLevel());
-            queue.addLast(newTask);
+        DoublyLinkedList<Entry> QueueToClone = getQueue();
+        DoublyLinkedList<Entry> queue = new DoublyLinkedList<>();
+        for(Entry entry : QueueToClone){
+            if (entry instanceof InmediateSales) {
+                InmediateSales newSale = new InmediateSales(entry.getDetail(), entry.getDocument(), entry.getValue(), entry.getClientName(), entry.getID(), ((InmediateSales) entry).isCash());
+                queue.enqueue(newSale);
+            }
         }
 
         // Cloning the Heap
-        ArrayList<Task> maxHeapToClone = getPriorityQueue().getElements();
-        MaxHeap<Task> heap =  new MaxHeap<>();
-        for(Task task : maxHeapToClone){
-            Task newTask = new Task(task.getTitle(), task.getDescription(), task.getPriorityLevel());
-            heap.insert(newTask);
+        ArrayList<Entry> maxHeapToClone = getPriorityQueue().getElements();
+        MaxHeap<Entry> heap =  new MaxHeap<>();
+        for(Entry entry : maxHeapToClone){
+            if (entry instanceof CreditSales) {
+                CreditSales newSale = new CreditSales(entry.getDetail(), entry.getDocument(), entry.getValue(), entry.getClientName(), entry.getID());
+                heap.insert(newSale);
+            }
         }
 
         doublyStack.push(queue);
@@ -97,137 +102,134 @@ public class Controller {
      * Loads the previous state of the controller from the undo stacks.
      */
     public void loadFromStacks(){
-        DoublyLinkedList<Task> loadedQueue = doublyStack.pop();
-        MaxHeap<Task> loadedHeap =  maxHeapStack.pop();
+        DoublyLinkedList<Entry> loadedQueue = doublyStack.pop();
+        MaxHeap<Entry> loadedHeap =  maxHeapStack.pop();
         setQueue(loadedQueue);
         setPriorityQueue(loadedHeap);
 
         // Add the elements of the DoublyLinkedList to the HasTable
-        HashTable<String,Task> loadedTable = new HashTable<>();
+        HashTable<String,Entry> loadedTable = new HashTable<>();
 
-        for (Task task : loadedQueue) {
-            loadedTable.add(task.getTitle(), task);
+        for (Entry entry : loadedQueue) {
+            loadedTable.add(entry.getID(), entry);
         }
 
         // Add the elements of the MaxHeap to the HasTable
-        for (Task task : loadedHeap.getElements()) {
-            loadedTable.add(task.getTitle(), task);
+        for (Entry entry : loadedHeap.getElements()) {
+            loadedTable.add(entry.getID(), entry);
         }
 
         // Add the HashTable to the new Controller
         setTable(loadedTable);
     }
 
-    /**
-     * Modifies a task based on the provided options.
-     *
-     * @param title    The title of the task to modify.
-     * @param option   The modification option (1 for title, 2 for description, 3 for priority).
-     * @param newValue The new value for the modification.
-     * @return True if the modification is successful, false otherwise.
-     */
-    public boolean modifyTask(String title, int option,String newValue ){
+    public boolean modifyCreditSale(String ID, int option, String newValue){
         boolean flag=false;
-        if(table.containsKey(title)){
+        Entry entry= table.get(ID);
+        if(entry instanceof CreditSales){
             saveToStacks();
-            switch (option) {
+            switch (option){
                 case 1:
-                    flag=modifyTaskTitle(title,newValue);
+                    ((CreditSales) entry).setDetail(newValue);
+                    flag=true;
                     break;
                 case 2:
-                    table.get(title).setDescription(newValue);
+                    ((CreditSales) entry).setDocument(newValue);
                     flag=true;
                     break;
                 case 3:
-                    flag=modifyTaskPriority(title,Integer.parseInt(  newValue));
+                    ((CreditSales) entry).setValue(Double.parseDouble(newValue));
+                    flag=true;
                     break;
-                default:
+                case 4:
+                    ((CreditSales) entry).setClientName(newValue);
+                    flag=true;
+                    break;
+                case 5:
+                    flag=modifySaleID(ID,newValue);
+                    break;
+                case 6:
+                    ((CreditSales) entry).setPriorityLevel(Integer.parseInt(newValue));
+                    flag=true;
+                    break;
             }
+        }
+        saveData();
+        return flag;
+    }
 
+    public boolean modifyInmediateSale(String ID, int option, String newValue){
+        boolean flag=false;
+        Entry entry= table.get(ID);
+        if(entry instanceof InmediateSales){
+            saveToStacks();
+            switch (option){
+                case 1:
+                    ((InmediateSales) entry).setDetail(newValue);
+                    flag=true;
+                    break;
+                case 2:
+                    ((InmediateSales) entry).setDocument(newValue);
+                    flag=true;
+                    break;
+                case 3:
+                    ((InmediateSales) entry).setValue(Double.parseDouble(newValue));
+                    flag=true;
+                    break;
+                case 4:
+                    ((InmediateSales) entry).setClientName(newValue);
+                    flag=true;
+                    break;
+                case 5:
+                    flag=modifySaleID(ID,newValue);
+                    break;
+                case 6:
+                    ((InmediateSales) entry).setCash(Boolean.parseBoolean(newValue));
+                    flag=true;
+                    break;
+            }
         }
         saveData();
         return flag;
     }
 
 
-    /**
-     * Modifies the priority of a task.
-     *
-     * @param title       The title of the task to modify.
-     * @param newPriority The new priority level to set.
-     * @return True if the modification is successful, false otherwise.
-     */
-    private boolean modifyTaskPriority(String title, int newPriority){
+
+    private boolean modifySalePriority(String ID, int newPriority){
         boolean flag=false;
-        Task task= table.get(title);
-        int prevPriority=task.getPriorityLevel();
-
-        if(prevPriority==0 &&newPriority>0){
-            removeFromQueue(title);
-            task.setPriorityLevel(newPriority);
-            priorityQueue.insert(task);
-            flag=true;
-        }else if(prevPriority>0 &&newPriority==0){
-            removeFromHeap(title);
-            task.setPriorityLevel(newPriority);
-            queue.enqueue(task);
-            flag=true;
-        }else if(prevPriority>0&&newPriority>0&&prevPriority!=newPriority){
-            ArrayList<Task> heapTasks=((MaxHeap<Task>) priorityQueue).getElements();
-            for(int i=0;i< heapTasks.size();i++){
-                if(heapTasks.get(i) == task){
-                    flag= priorityQueue.modifyKey(i,newPriority);
-                    break;
-
-                }
-            }
-        }
-
-
-
-        return flag;
-    }
-
-    /**
-     * Modifies the title of a task.
-     *
-     * @param title    The current title of the task.
-     * @param newTitle The new title to set.
-     * @return True if the modification is successful, false otherwise.
-     */
-    private boolean modifyTaskTitle(String title,String newTitle){
-        boolean flag=false;
-        Task task=table.get(title);
-        table.remove(title);
-        task.setTitle(newTitle);
-        if(!table.containsKey(newTitle)){
-            table.add(task.getTitle(),task);
-            flag=true;
-        }
-
-
-        return flag;
-    }
-
-    /**
-     * Removes a task with the given title.
-     *
-     * @param title The title of the task to remove.
-     * @return True if the task is removed successfully, false otherwise.
-     */
-    public boolean removeTask(String title){
-
-        boolean flag=false;
-        if(table.containsKey(title)){
+        Entry entry= table.get(ID);
+        if(entry instanceof CreditSales){
             saveToStacks();
-            Task taskToRemove=table.get(title);
+            ((CreditSales) entry).setPriorityLevel(newPriority);
+            flag=true;
+        }
+        return flag;
+    }
 
-            if(taskToRemove.getPriorityLevel()>0){
-                flag=removeFromHeap(title);
-            }else{
-                flag=removeFromQueue(title);
+    private boolean modifySaleID(String ID,String newID){
+        boolean flag=false;
+        Entry entry= table.get(ID);
+        if(!table.containsKey(newID)){
+            entry.setID(newID);
+            table.remove(ID);
+            table.add(newID,entry);
+            flag=true;
+        }
+        return flag;
+    }
+
+    public boolean removeSale(String ID){
+
+        boolean flag=false;
+        if(table.containsKey(ID)){
+            saveToStacks();
+            Entry entryToRemove=table.get(ID);
+            if(entryToRemove instanceof InmediateSales){
+                flag=removeFromQueue(ID);
+            }else if(entryToRemove instanceof CreditSales){
+                flag=removeFromHeap(ID);
             }
-            table.remove(title);
+            table.remove(ID);
         }
 
         saveData();
@@ -241,29 +243,15 @@ public class Controller {
      *
      * @return List of attributes for non-prioritized tasks.
      */
-    public ArrayList<ArrayList<String>> getCreditSalesAttributes(){
+    public ArrayList<ArrayList<String>> getSalesAttributes(boolean inmediate){
 
         ArrayList<ArrayList<String>> list=new ArrayList<>();
-        for(Task task: (DoublyLinkedList<Task>) queue){
-            list.add(task.getAttributes());
-        }
-        return list;
-    }
-
-    /**
-     * Retrieves attributes of prioritized tasks.
-     *
-     * @return List of attributes for prioritized tasks.
-     */
-    public ArrayList<ArrayList<String>> getInmediateSalesAttributes(){
-        ArrayList<ArrayList<String>> list=new ArrayList<>();
-        ArrayList<Task> heapList=((MaxHeap<Task>)priorityQueue).getElements();
-        ArrayList<Task> copy=  copyTasks(heapList);
-        copy=sortTasksByPriorityLevel(copy);
-
-        for (int i = 0; i < copy.size(); i++) {
-            list.add(copy.get(i).getAttributes());
-
+        for(Entry entry: (DoublyLinkedList<Entry>) queue){
+            if(inmediate && entry instanceof InmediateSales){
+                list.add(entry.getAttributes());
+            }else if(!inmediate && entry instanceof CreditSales){
+                list.add(entry.getAttributes());
+            }
         }
         return list;
     }
@@ -287,55 +275,36 @@ public class Controller {
         }
     }
 
-    /**
-     * Adds a new task with the given title, description, and priority level.
-     *
-     * @param title          The title of the task.
-     * @param description    The description of the task.
-     * @param priorityLevel  The priority level of the task.
-     * @return True if the task is added successfully, false otherwise.
-     */
-    public boolean addTask(String title,String description, int priorityLevel){
+    public boolean addInmediateSale(String ID,String document, String detail, double value, boolean cash, String clientName ){
 
         boolean flag=false;
-
-        if(!table.containsKey(title)){
+        if(!table.containsKey(ID)){
             saveToStacks();
-            Task newTask=new Task(title,description,priorityLevel);
-            table.add(newTask.getTitle(), newTask);
-            if(priorityLevel>0){
-                priorityQueue.insert(newTask);
-            }else{
-                queue.enqueue(newTask);
-            }
-	    saveData();
-
-
+            InmediateSales newSale=new InmediateSales(detail, document, value, clientName, ID, cash);
+            table.add(newSale.getID(),newSale);
+            queue.enqueue(newSale);
             flag=true;
-
         }
+        saveData();
         return flag;
 
     }
 
+    public boolean addCreditSale(String ID,String document, String detail, double value, String clientName){
 
-    /**
-     * Sorts tasks by priority level in descending order.
-     *
-     * @param tasks The list of tasks to be sorted.
-     * @return A sorted list of tasks by priority level.
-     */
-    private ArrayList<Task> sortTasksByPriorityLevel(ArrayList<Task> tasks){
-        ArrayList<Task>sortedTasks=new ArrayList<>();
-        MaxHeap<Task> heap;
-        heap = new MaxHeap<>(tasks);
-        int n= heap.size();
-        for (int i = n-1; i >=0; i--) {
-            sortedTasks.add(heap.extractMax());
+        boolean flag=false;
+        if(!table.containsKey(ID)){
+            saveToStacks();
+            CreditSales newSale=new CreditSales(detail, document, value, clientName, ID);
+            table.add(newSale.getID(),newSale);
+            queue.enqueue(newSale);
+            flag=true;
         }
-        return sortedTasks;
+        saveData();
+        return flag;
 
     }
+
 
     /**
      * Copies a list of tasks.
@@ -343,7 +312,7 @@ public class Controller {
      * @param list The list of tasks to be copied.
      * @return A new list containing copied tasks.
      */
-    private <T> ArrayList<T> copyTasks(ArrayList<T> list){
+    private <T> ArrayList<T> copySales(ArrayList<T> list){
         ArrayList<T> copy=new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             copy.add(list.get(i));
@@ -351,56 +320,94 @@ public class Controller {
         return copy;
     }
 
-    /**
-     * Removes a task with the given title from the heap.
-     *
-     * @param title The title of the task to be removed.
-     * @return True if the task is removed from the heap successfully, false otherwise.
-     */
-    private boolean removeFromHeap(String title){
-        ArrayList<Task> heapTasks=((MaxHeap<Task>) priorityQueue).getElements();
+
+    private boolean removeFromHeap(String ID){
+        ArrayList<Entry> heapTasks=((MaxHeap<Entry>) priorityQueue).getElements();
         boolean flag=false;
         for (int i = 0; i < heapTasks.size()&&!flag; i++) {
-            String taskTitle=heapTasks.get(i).getTitle();
-            if(taskTitle.equals(title)){
-                flag=((MaxHeap<Task>)priorityQueue).remove(i);
+            String saleID=heapTasks.get(i).getID();
+            if(saleID.equals(ID)){
+                flag=((MaxHeap<Entry>)priorityQueue).remove(i);
             }
         }
         return flag;
     }
 
-    /**
-     * Removes a task with the given title from the queue.
-     *
-     * @param title The title of the task to be removed.
-     * @return True if the task is removed from the queue successfully, false otherwise.
-     */
-    private boolean removeFromQueue(String title){
-        BiPredicate<Task,String> equals= (t,u)->t.getTitle().equals(u);
-        return ((DoublyLinkedList<Task>) queue).removeFirstInstance(title,equals);
+    private boolean removeFromQueue(String ID){
+        BiPredicate<Entry,String> equals= (t,u)->t.getID().equals(u);
+        return ((DoublyLinkedList<Entry>) queue).removeFirstInstance(ID,equals);
 
     }
 
     // Getters and Setters
-    public void setTable(HashTable<String, Task> table) {
+    public void setTable(HashTable<String, Entry> table) {
         this.table = table;
     }
 
 
-    public void setQueue(DoublyLinkedList<Task> queue) {
+    public void setQueue(DoublyLinkedList<Entry> queue) {
         this.queue = queue;
     }
 
 
-    public void setPriorityQueue(MaxHeap<Task> priorityQueue) {
+    public void setPriorityQueue(MaxHeap<Entry> priorityQueue) {
         this.priorityQueue = priorityQueue;
     }
 
-    public DoublyLinkedList<Task> getQueue() {
+    public DoublyLinkedList<Entry> getQueue() {
         return queue;
     }
 
-    public MaxHeap<Task> getPriorityQueue() {
+    public MaxHeap<Entry> getPriorityQueue() {
         return priorityQueue;
+    }
+
+    public HashTable<String, Entry> getTable() {
+        return table;
+    }
+
+    public DoublyLinkedList<DoublyLinkedList<Entry>> getDoublyStack() {
+        return doublyStack;
+    }
+
+    public void setDoublyStack(DoublyLinkedList<DoublyLinkedList<Entry>> doublyStack) {
+        this.doublyStack = doublyStack;
+    }
+
+    public DoublyLinkedList<MaxHeap<Entry>> getMaxHeapStack() {
+        return maxHeapStack;
+    }
+
+    public void setMaxHeapStack(DoublyLinkedList<MaxHeap<Entry>> maxHeapStack) {
+        this.maxHeapStack = maxHeapStack;
+    }
+
+    public void setInstance(Controller instance) {
+        this.instance = instance;
+    }
+
+    public static FileManager getFileManager() {
+        return fileManager;
+    }
+
+    public CreditSales getCreditSale(String ID){
+        return (CreditSales) table.get(ID);
+    }
+
+    public InmediateSales getInmediateSale(String ID){
+        return (InmediateSales) table.get(ID);
+    }
+
+    public String generateID(){
+        // Generate a random number
+        Random random = new Random();
+        int randomNumber = random.nextInt(1000000);
+        String ID = String.valueOf(randomNumber);
+        // Check if the ID is already in use
+        while(table.containsKey(ID)){
+            randomNumber = random.nextInt(1000000);
+            ID = String.valueOf(randomNumber);
+        }
+        return ID;
     }
 }

@@ -40,4 +40,22 @@ public class InmediateSales extends Entry{
         attributes.add(String.valueOf(isCash));
         return attributes;
     }
+
+    public String hash() {
+        long key = getID().hashCode();
+        return Long.toString(key);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    public int getHeapKey() {
+        return getID().hashCode();
+    }
+
+    public void setHeapKey(int newKey) {
+        setID(String.valueOf(newKey));
+    }
 }

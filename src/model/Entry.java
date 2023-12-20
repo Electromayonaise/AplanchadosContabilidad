@@ -1,6 +1,6 @@
 package model;
 
-public abstract class Entry {
+public abstract class Entry implements HeapKeyProvider, Cloneable{
 
     private String ID;
     private String detail;
