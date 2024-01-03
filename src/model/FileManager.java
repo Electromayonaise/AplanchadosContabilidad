@@ -68,8 +68,8 @@ public class FileManager {
         createResources();
 
         // Load the queue and the maxheap
-        DoublyLinkedList<Task> loadedQueue = loadDoublyLinkedListFromJSON(Task[].class);
-        MaxHeap<Task> loadedHeap = loadMaxHeapFromJSON();
+        DoublyLinkedList<Entry> loadedQueue = loadDoublyLinkedListFromJSON(Entry[].class);
+        MaxHeap<Entry> loadedHeap = loadMaxHeapFromJSON();
 
         // Create a new Controller
         Controller loadedController = new Controller();
@@ -79,15 +79,15 @@ public class FileManager {
         loadedController.setPriorityQueue(loadedHeap);
 
         // Add the elements of the DoublyLinkedList to the HashTable
-        HashTable<String, Task> loadedTable = new HashTable<>();
+        HashTable<String, Entry> loadedTable = new HashTable<>();
 
-        for (Task task : loadedQueue) {
-            loadedTable.add(task.getTitle(), task);
+        for (Entry entry : loadedQueue) {
+            loadedTable.add(entry.getID(), entry);
         }
 
         // Add the elements of the MaxHeap to the HashTable
-        for (Task task : loadedHeap.getElements()) {
-            loadedTable.add(task.getTitle(), task);
+        for (Entry entry : loadedHeap.getElements()) {
+            loadedTable.add(entry.getID(), entry);
         }
 
         // Add the HashTable to the new Controller
@@ -163,16 +163,16 @@ public class FileManager {
      * @return The loaded MaxHeap.
      * @throws IOException If an I/O error occurs.
      */
-    public MaxHeap<Task> loadMaxHeapFromJSON() throws IOException {
+    public MaxHeap<Entry> loadMaxHeapFromJSON() throws IOException {
         Gson gson = new Gson();
 
-        MaxHeap<Task> loadedHeap = new MaxHeap<>();
+        MaxHeap<Entry> loadedHeap = new MaxHeap<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(maxheapFile))) {
             String jsonLine;
             while ((jsonLine = reader.readLine()) != null) {
-                Task task = gson.fromJson(jsonLine, Task.class);
-                loadedHeap.insert(task);
+                Entry entry = gson.fromJson(jsonLine, Entry.class);
+                loadedHeap.insert(entry);
             }
         }
 

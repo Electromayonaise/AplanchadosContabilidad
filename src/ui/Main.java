@@ -41,10 +41,6 @@ public class Main {
         IntermediaryDataPanel intermediaryDataPanel = new IntermediaryDataPanel(containerPanel);
         containerPanel.add(intermediaryDataPanel, "IntermediaryDataPanel");
 
-        // Create and add the DataPanel to the container
-        DataPanel dataPanel = new DataPanel(containerPanel);
-        containerPanel.add(dataPanel, "DataPanel");
-
         // Add the container panel to the JFrame's content pane
         frame.getContentPane().add(containerPanel);
 

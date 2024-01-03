@@ -1,7 +1,10 @@
 package ui;
 
-import model.ArrayList;
 import model.Controller;
+import model.Expenses;
+import model.OperationExpenses;
+import model.SupplyExpenses;
+import model.ArrayList;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,335 +12,290 @@ import java.awt.*;
 public class DailySellsSummaryPanel extends BasePanel {
 
     private final Controller controller;
+
     private final Color myRed = new Color(255, 175, 175);
-    private final Color TASKCOLOR = new Color(90, 90, 90);
 
     private JPanel displayPanel;
 
     private final CardLayout cardLayout = new CardLayout();
-    private DefaultListModel<String> taskListModel;
-    private DefaultListModel<String> taskNameListModel; // List to store task names
-    private boolean displayByPriority = true; // Track the current display mode
+    private DefaultListModel<String> expensesListModel;
+    private DefaultListModel<String> expensesIDListModel;
+    private boolean displaySupply = true;
 
-    /**
-     * Constructs a DataPanel with a reference to the container panel.
-     *
-     * @param containerPanel The container panel that holds this DataPanel.
-     */
     public DailySellsSummaryPanel(JPanel containerPanel) {
         super(containerPanel);
         controller = Controller.getInstance();
         initUI();
     }
 
-    /**
-     * Initializes the UI components of the DataPanel.
-     */
     private void initUI() {
-        setLayout(new BorderLayout()); // Use BorderLayout for better element placement
-        setOpaque(false); // Make the panel transparent
+        setLayout(new BorderLayout());
+        setOpaque(false);
 
-        // Create a title label with red color and centered
-        JLabel titleLabel = new JLabel("Data Panel");
+        JLabel titleLabel = new JLabel("Expenses Panel");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(myRed);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(titleLabel, BorderLayout.NORTH); // Place the title at the top
+        add(titleLabel, BorderLayout.NORTH);
 
-        // Your content here
         JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BorderLayout()); // Use BorderLayout to display tasks as a list
-        contentPanel.setOpaque(false); // Make the content panel transparent
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.setOpaque(false);
 
-        // Create a panel for the left column
         JPanel leftColumnPanel = new JPanel(new BorderLayout());
         leftColumnPanel.setOpaque(false);
 
-        // Create a button to switch display type
         JButton toggleDisplayButton = createStyledButton("Change visualization", myRed);
         toggleDisplayButton.addActionListener(e -> {
-            displayByPriority = !displayByPriority; // Toggle the display mode
-            refreshDisplay(); // Update the displayed tasks
+            displaySupply = !displaySupply;
+            refreshDisplay();
         });
 
-        // Add the "Toggle Display" button to the left column panel
-        leftColumnPanel.add(toggleDisplayButton, BorderLayout.NORTH); // Add the button to the left column
+        leftColumnPanel.add(toggleDisplayButton, BorderLayout.NORTH);
 
-        // Add the leftColumnPanel to the main panel
         add(leftColumnPanel, BorderLayout.WEST);
 
-        // Create a panel for displaying tasks (by priority or arrival order)
         displayPanel = new JPanel(cardLayout);
         displayPanel.setOpaque(false);
 
-        // Create a panel for displaying tasks by priority
-        JPanel priorityPanel = new JPanel(new BorderLayout());
-        JLabel priorityLabel = new JLabel("Priority");
-        priorityLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        priorityLabel.setForeground(myRed);
-        priorityPanel.add(priorityLabel, BorderLayout.NORTH);
-        taskListModel = new DefaultListModel<>();
-        taskNameListModel = new DefaultListModel<>(); // Initialize task name list model
-        updateTaskListModels(); // Update the list models with task data
-        JList<String> priorityList = new JList<>(taskNameListModel);
-        priorityList.setFont(new Font("Arial", Font.PLAIN, 16));
-        displayPanel.add(priorityPanel, "Priority");
+        JPanel supplyPanel = new JPanel(new BorderLayout());
+        JLabel supplyLabel = new JLabel("Supply Expenses");
+        supplyLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        supplyLabel.setForeground(myRed);
+        supplyPanel.add(supplyLabel, BorderLayout.NORTH);
+        expensesListModel = new DefaultListModel<>();
+        expensesIDListModel = new DefaultListModel<>();
+        updateExpensesListModels();
+        JList<String> supplyExpensesList = new JList<>(expensesIDListModel);
+        supplyExpensesList.setFont(new Font("Arial", Font.PLAIN, 16));
+        displayPanel.add(supplyPanel, "Supply Expenses");
 
-        // Create a panel for displaying tasks by arrival order
-        JPanel arrivalPanel = new JPanel(new BorderLayout());
-        JLabel arrivalLabel = new JLabel("Arrival Order");
-        arrivalLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        arrivalLabel.setForeground(myRed);
-        arrivalPanel.add(arrivalLabel, BorderLayout.NORTH);
-        JList<String> arrivalList = new JList<>(taskNameListModel); // Use the same task name list model
-        arrivalList.setFont(new Font("Arial", Font.PLAIN, 16));
-        displayPanel.add(arrivalPanel, "Arrival");
+        JPanel operationPanel = new JPanel(new BorderLayout());
+        JLabel operationLabel = new JLabel("Operation Expenses");
+        operationLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        operationLabel.setForeground(myRed);
+        operationPanel.add(operationLabel, BorderLayout.NORTH);
+        JList<String> operationExpensesList = new JList<>(expensesIDListModel);
+        operationExpensesList.setFont(new Font("Arial", Font.PLAIN, 16));
+        displayPanel.add(operationPanel, "Operation Expenses");
 
-        // Add the displayPanel to the left column
         leftColumnPanel.add(displayPanel, BorderLayout.CENTER);
 
-        // Create a panel for the right column (buttons)
         JPanel rightColumnPanel = new JPanel(new GridLayout(0, 2));
         rightColumnPanel.setOpaque(false);
 
-        JList<String> taskList = new JList<>(taskNameListModel);
-        taskList.setFont(new Font("Arial", Font.PLAIN, 16));
-        taskList.setForeground(TASKCOLOR); // Set text color
-        JScrollPane scrollPane = new JScrollPane(taskList);
+        JList<String> expensesList = new JList<>(expensesIDListModel);
+        expensesList.setFont(new Font("Arial", Font.PLAIN, 16));
+        expensesList.setForeground(myRed);
+        JScrollPane scrollPane = new JScrollPane(expensesList);
         contentPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Add a selection listener to handle item click events
-        taskList.addListSelectionListener(e -> {
+        expensesList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                // Handle the task selection, e.g., show further info
-                int selectedIndex = taskList.getSelectedIndex();
+                int selectedIndex = expensesList.getSelectedIndex();
                 if (selectedIndex != -1) {
-                    String selectedTaskName = taskNameListModel.getElementAt(selectedIndex);
-                    showTaskInfo(selectedTaskName);
+                    String selectedExpenseID = expensesIDListModel.getElementAt(selectedIndex);
+                    showExpenseInfo(selectedExpenseID);
                 }
             }
         });
 
-        add(contentPanel, BorderLayout.CENTER); // Place the content in the center
+        add(contentPanel, BorderLayout.CENTER);
 
-        // Create a panel for buttons
-        JPanel buttonPanel = new JPanel(new GridLayout(0, 2)); // 2 columns for modify and delete buttons
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 2));
         buttonPanel.setOpaque(false);
 
-        // Modify button
-        JButton modifyButton = createStyledButton("Modify Task", myRed);
+        JButton modifyButton = createStyledButton("Modificar gasto", myRed);
         modifyButton.addActionListener(e -> {
-            int selectedIndex = taskList.getSelectedIndex();
+            int selectedIndex = expensesList.getSelectedIndex();
             if (selectedIndex != -1) {
-                String selectedTaskName = taskNameListModel.getElementAt(selectedIndex);
-                String[] options = {"Modify Name", "Modify Priority", "Modify Description"};
-                int choice = JOptionPane.showOptionDialog(DailySellsSummaryPanel.this, "What would you like to modify?", "Modify Task", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                String selectedExpenseID = expensesIDListModel.getElementAt(selectedIndex);
+                Expenses selectedExpense = displaySupply
+                        ? controller.getSupplyExpense(selectedExpenseID)
+                        : controller.getOperationExpense(selectedExpenseID);
+
+                String[] options = {"Modificar Detalle", "Modificar Documento", "Modificar Valor"};
+                int choice = JOptionPane.showOptionDialog(DailySellsSummaryPanel.this, "Que desea modificar?", "Modificar Gasto", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
                 if (choice == 0) {
-                    // Modify Name
-                    String modifiedName = JOptionPane.showInputDialog("Modify Task Name", selectedTaskName);
-                    if (modifiedName != null && !modifiedName.isEmpty()) {
-                        // Update the task name in the controller
-                        controller.modifyTask(selectedTaskName, 1, modifiedName);
-                        // Update the task name in the taskNameListModel
-                        taskNameListModel.setElementAt(modifiedName, selectedIndex);
+                    // Modify Detail
+                    String modifiedDetail = JOptionPane.showInputDialog("Modificar Detalle", selectedExpense.getDetail());
+                    if (modifiedDetail != null && !modifiedDetail.isEmpty()) {
+                        controller.modifyExpense(selectedExpenseID, 1, modifiedDetail);
+                        expensesIDListModel.setElementAt(modifiedDetail, selectedIndex);
                     }
                 } else if (choice == 1) {
-                    // Modify Priority
-                    JSlider slider = getjSlider();
-                    JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, slider, "Select new Task Priority", JOptionPane.QUESTION_MESSAGE);
-                    String modifiedPriority = String.valueOf(slider.getValue());
-                    // Update the task priority in the controller
-                    controller.modifyTask(selectedTaskName, 3, modifiedPriority);
-                    // No need to update the task name in the taskNameListModel for priority modification
+                    // Modify Document
+                    String modifiedDocument = JOptionPane.showInputDialog("Modificar Documento", selectedExpense.getDocument());
+                    if (modifiedDocument != null && !modifiedDocument.isEmpty()) {
+                        controller.modifyExpense(selectedExpenseID, 2, modifiedDocument);
+                        expensesIDListModel.setElementAt(modifiedDocument, selectedIndex);
+                    }
                 } else if (choice == 2) {
-                    // Modify Description
-                    String modifiedDescription = JOptionPane.showInputDialog("Modify Task Description", selectedTaskName);
-                    if (modifiedDescription != null) {
-                        // Update the task description in the controller
-                        controller.modifyTask(selectedTaskName, 2, modifiedDescription);
-                        // No need to update the task name in the taskNameListModel for description modification
+                    // Modify Value
+                    String modifiedValue = JOptionPane.showInputDialog("Modificar Valor", selectedExpense.getValue());
+                    if (modifiedValue != null && !modifiedValue.isEmpty()) {
+                        controller.modifyExpense(selectedExpenseID, 3, modifiedValue);
+                        expensesIDListModel.setElementAt(modifiedValue, selectedIndex);
                     }
                 }
-                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Task modified successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                // Refresh the display panel to update the displayed tasks
-                refreshDisplay();
+
+                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Gasto modificado exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Please select a task first.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Porfavor selecciona un gasto primero.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // Delete button
-        JButton deleteButton = createStyledButton("Delete Task", myRed);
+        JButton deleteButton = createStyledButton("Eliminar gasto", myRed);
         deleteButton.addActionListener(e -> {
-            int selectedIndex = taskList.getSelectedIndex();
+            int selectedIndex = expensesList.getSelectedIndex();
             if (selectedIndex != -1) {
-                String selectedTaskName = taskNameListModel.getElementAt(selectedIndex);
-                // Remove the task from the list models
-                taskNameListModel.removeElementAt(selectedIndex);
-                taskListModel.removeElementAt(selectedIndex);
-                // Remove the task from the controller
-                controller.removeTask(selectedTaskName);
-                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Task deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                String selectedExpenseID = expensesIDListModel.getElementAt(selectedIndex);
+                expensesIDListModel.removeElementAt(selectedIndex);
+                expensesListModel.removeElementAt(selectedIndex);
+                controller.removeExpense(selectedExpenseID);
+                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Gasto eliminado exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Please select a task first.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Porfavor selecciona un gasto primero.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // Add buttons to the button panel
         buttonPanel.add(modifyButton);
         buttonPanel.add(deleteButton);
 
-        // Create a panel for the "Add Task" button
-        JPanel addTaskPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        addTaskPanel.setOpaque(false);
+        JPanel addExpensePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        addExpensePanel.setOpaque(false);
 
-        // Add Task button
-        JButton addButton = createStyledButton("Add Task", myRed);
+        JButton addButton = createStyledButton("Añadir gasto", myRed);
         addButton.addActionListener(e -> {
-            String taskName = JOptionPane.showInputDialog("Enter Task Name");
-            if (taskName != null && !taskName.isEmpty()) {
-                JSlider slider = getjSlider();
-                JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, slider, "Select Task Priority", JOptionPane.QUESTION_MESSAGE);
-                int taskPriority = slider.getValue();
-                String taskDescription = JOptionPane.showInputDialog("Enter Task Description");
-                if (taskDescription != null) {
-                    boolean success = controller.addTask(taskName, taskDescription, taskPriority);
-                    if (success) {
-                        refreshDisplay();
-                        JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Task added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            JPanel inputPanel = new JPanel(new GridLayout(0, 1));
+            inputPanel.setOpaque(false);
+
+            JTextField detailField = new JTextField();
+            JTextField documentField = new JTextField();
+            JTextField valueField = new JTextField();
+
+            inputPanel.add(new JLabel("Detalle:"));
+            inputPanel.add(detailField);
+            inputPanel.add(new JLabel("Documento:"));
+            inputPanel.add(documentField);
+            inputPanel.add(new JLabel("Valor:"));
+            inputPanel.add(valueField);
+
+            int result = JOptionPane.showConfirmDialog(DailySellsSummaryPanel.this, inputPanel, "Añadir gasto", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            if (result == JOptionPane.OK_OPTION) {
+                String detail = detailField.getText();
+                String document = documentField.getText();
+                String valueStr = valueField.getText();
+
+                // Validate input
+                if (detail.isEmpty() || document.isEmpty() || valueStr.isEmpty()) {
+                    JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Por favor, completa todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                try {
+                    double value = Double.parseDouble(valueStr);
+
+                    if (displaySupply) {
+                        // Create a new supply expense
+                        controller.addExpense(document, detail, value, false);
+                        SupplyExpenses newSupplyExpense = controller.getSupplyExpense(document);
+                        expensesIDListModel.addElement(newSupplyExpense.hash());
+                        expensesListModel.addElement(newSupplyExpense.getDetail());
                     } else {
-                        JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Task with the same name already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                        // Create a new operation expense
+                        controller.addExpense(document, detail, value, false);
+                        OperationExpenses newOperationExpense = controller.getOperationExpense(document);
+                        expensesIDListModel.addElement(newOperationExpense.hash());
+                        expensesListModel.addElement(newOperationExpense.getDetail());
                     }
+
+                    JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Gasto añadido exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } catch (NumberFormatException e1) {
+                    JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Por favor, introduce un valor numérico válido.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-        addTaskPanel.add(addButton);
+        addExpensePanel.add(addButton);
 
-        // Create a panel for the "Return to Menu" button
         JPanel returnButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         returnButtonPanel.setOpaque(false);
 
-        // Return to Menu button
         JButton returnButton = getReturnButton();
 
         returnButtonPanel.add(returnButton);
 
-        // Create a container panel for all buttons
         JPanel buttonsContainer = new JPanel(new BorderLayout());
         buttonsContainer.setOpaque(false);
 
-        // Add the button panels to the wrapper panel
         buttonsContainer.add(buttonPanel, BorderLayout.NORTH);
-        buttonsContainer.add(addTaskPanel, BorderLayout.CENTER);
+        buttonsContainer.add(addExpensePanel, BorderLayout.CENTER);
         buttonsContainer.add(returnButtonPanel, BorderLayout.SOUTH);
 
-        // Add the buttons container to the south
         add(buttonsContainer, BorderLayout.SOUTH);
 
-        // Button to undo the last action
         JButton undoButton = createStyledButton("Undo", myRed);
         undoButton.addActionListener(e -> {
-
             boolean undo = controller.undo();
-            if(undo){
+            if (undo) {
                 refreshDisplay();
                 JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "Undo successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-            }else{
+            } else {
                 JOptionPane.showMessageDialog(DailySellsSummaryPanel.this, "No undo possible", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // Add the undo button to the left column panel
         leftColumnPanel.add(undoButton, BorderLayout.SOUTH);
     }
 
-    /**
-     * Creates and returns a styled JSlider for selecting task priorities.
-     *
-     * @return A JSlider with specific styling.
-     */
-    private JSlider getjSlider() {
-        JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 3, 1);
-        slider.setMajorTickSpacing(1);
-        slider.setPaintTicks(true);
-        slider.setPaintLabels(true);
-        slider.setSnapToTicks(true);
-        slider.setOpaque(false);
-        slider.setForeground(myRed);
-        slider.setBackground(Color.WHITE);
-        slider.setPreferredSize(new Dimension(300, 100));
-        slider.setFont(new Font("Arial", Font.BOLD, 16));
-        slider.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        return slider;
-    }
+    private void updateExpensesListModels() {
+        expensesIDListModel.clear();
+        expensesListModel.clear();
 
-    /**
-     * Updates the task list models based on the current display mode.
-     */
-    private void updateTaskListModels() {
-        taskNameListModel.clear();
-        taskListModel.clear();
-
-        // Get the tasks from the controller based on the current display mode
-        ArrayList<ArrayList<String>> tasks;
-        if (displayByPriority) {
-            tasks = controller.getInmediateSalesAttributes();
-
+        ArrayList<ArrayList<String>> expenses;
+        if (displaySupply) {
+            expenses = controller.getExpensesAttributes(false);
         } else {
-            tasks = controller.getCreditSalesAttributes();
+            expenses = controller.getExpensesAttributes(true);
         }
 
-        for (ArrayList<String> task : tasks) {
-            String taskName = task.get(0);
-            taskNameListModel.addElement(taskName); // Only add task name to the list
+        for (ArrayList<String> expense : expenses) {
+            String expenseID = expense.get(0);
+            expensesIDListModel.addElement(expenseID);
 
-            String taskDetails = task.get(1) + " Priority: " + task.get(2);
-            taskListModel.addElement(taskDetails);
+            String expenseDetails = expense.get(1) + " Document: " + expense.get(2) + " Value: " + expense.get(3);
+            expensesListModel.addElement(expenseDetails);
         }
-
     }
 
-
-    /**
-     * Fetches tasks based on the specified display mode (priority or arrival order).
-     *
-     * @param byPriority True if tasks should be fetched by priority, false for arrival order.
-     * @return A list of tasks with their attributes.
-     */
-    private ArrayList<ArrayList<String>> fetchTasks(boolean byPriority) {
-        if (byPriority) {
-            return controller.getInmediateSalesAttributes();
+    private void showExpenseInfo(String selectedExpenseID) {
+        ArrayList<ArrayList<String>> expenses;
+        if (displaySupply) {
+            expenses = controller.getExpensesAttributes(false);
         } else {
-            return controller.getCreditSalesAttributes();
+            expenses = controller.getExpensesAttributes(true);
         }
-    }
 
-    /**
-     * Refreshes the display panel to update the displayed tasks.
-     */
-    private void refreshDisplay() {
-        cardLayout.show(displayPanel, displayByPriority ? "Priority" : "Arrival");
-        updateTaskListModels();
-    }
+        for (ArrayList<String> expense : expenses) {
+            if (expense.get(0).equals(selectedExpenseID)) {
+                String expenseDetails = "Expense ID: " + expense.get(0) + "\n"
+                        + "Expense Detail: " + expense.get(1) + "\n"
+                        + "Expense Document: " + expense.get(2) + "\n"
+                        + "Expense Value: " + expense.get(3);
 
-    /**
-     * Shows detailed information about a selected task.
-     *
-     * @param selectedTaskName The name of the selected task.
-     */
-    private void showTaskInfo(String selectedTaskName) {
-        ArrayList<ArrayList<String>> tasks = fetchTasks(displayByPriority);
-        for (ArrayList<String> task : tasks) {
-            if (task.get(0).equals(selectedTaskName)) {
-                String taskDetails = "Task Name: " + task.get(0) + "\n"
-                        + "Task Description: " + task.get(1) + "\n"
-                        + "Task Priority: " + task.get(2);
-                JOptionPane.showMessageDialog(this, taskDetails, "Task Info", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, expenseDetails, "Expense Info", JOptionPane.INFORMATION_MESSAGE);
                 break;
             }
         }
     }
+
+    private void refreshDisplay() {
+        cardLayout.show(displayPanel, displaySupply ? "Supply Expenses" : "Operation Expenses");
+        updateExpensesListModels();
+    }
 }
+
+

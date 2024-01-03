@@ -365,21 +365,25 @@ public class EntriesPanel extends BasePanel {
                 if (inmediate) {
                     // Create a new inmediate sale
                     boolean cash = JOptionPane.showConfirmDialog(EntriesPanel.this, "Es en efectivo?", "Añadir ingreso", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.YES_OPTION;
-                    controller.addInmediateSale(ID, document, detail, Double.parseDouble(value), cash, clientName);
-                    InmediateSales newInmediateSale = controller.getInmediateSale(ID);
-                    entriesIDListModel.addElement(newInmediateSale.getID());
-                    entriesListModel.addElement(newInmediateSale.getDetail());
+                    boolean success = controller.addInmediateSale(ID, document, detail, Double.parseDouble(value), cash, clientName);
+                    if(success){
+                        refreshDisplay();
+                        JOptionPane.showMessageDialog(EntriesPanel.this, "Ingreso añadido exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    }else{
+                        JOptionPane.showMessageDialog(EntriesPanel.this, "No se pudo añadir el ingreso.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 } else {
-                    controller.addCreditSale(ID, document, detail, Double.parseDouble(value), clientName);
-                    // Create a new credit sale
-                    CreditSales newCreditSale = new CreditSales(detail, document, Double.parseDouble(value), clientName, controller.generateID());
-                    // Add the new task to the task name list model
-                    entriesIDListModel.addElement(newCreditSale.getDetail());
-                    // Add the new task to the task list model
-                    entriesListModel.addElement(newCreditSale.getDetail() + " Priority: " + newCreditSale.getPriorityLevel());
+                    boolean success = controller.addCreditSale(ID, document, detail, Double.parseDouble(value), clientName);
+                    if (success){
+                        refreshDisplay();
+                        JOptionPane.showMessageDialog(EntriesPanel.this, "Ingreso añadido exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    }else{
+                        JOptionPane.showMessageDialog(EntriesPanel.this, "No se pudo añadir el ingreso.", "Error", JOptionPane.ERROR_MESSAGE);
+                  }
                 }
 
                 JOptionPane.showMessageDialog(EntriesPanel.this, "Ingreso añadido exitosamente.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                refreshDisplay();
             }
         });
 

@@ -13,14 +13,20 @@ public class Controller {
     private transient static  Controller instance;
     private HashTable<String,Entry> table;
     private DoublyLinkedList<Entry> queue;
-
     private MaxHeap<Entry>priorityQueue;
+    private HashTable<String,Expenses> expensesTable;
+    private DoublyLinkedList<Expenses> expensesQueue;
+    private MaxHeap<Expenses>expensesPriorityQueue;
 
     private transient static final FileManager fileManager=FileManager.getInstance();
 
     private DoublyLinkedList<DoublyLinkedList<Entry>> doublyStack;
 
     private DoublyLinkedList<MaxHeap<Entry>> maxHeapStack;
+
+    private DoublyLinkedList<DoublyLinkedList<Expenses>> expensesDoublyStack;
+
+    private DoublyLinkedList<MaxHeap<Expenses>> expensesMaxHeapStack;
 
     /**
      * Private constructor to enforce singleton pattern and initialize data structures.
@@ -29,7 +35,9 @@ public class Controller {
         table=new HashTable<>();
         queue=new DoublyLinkedList<>();
         priorityQueue=new MaxHeap<>();
-
+        expensesTable=new HashTable<>();
+        expensesQueue=new DoublyLinkedList<>();
+        expensesPriorityQueue=new MaxHeap<>();
         doublyStack = new DoublyLinkedList<>();
         maxHeapStack = new DoublyLinkedList<>();
 
@@ -96,6 +104,27 @@ public class Controller {
 
         maxHeapStack.push(heap);
 
+        // Cloning the Expenses Queue
+        DoublyLinkedList<Expenses> expensesQueueClone = new DoublyLinkedList<>();
+        for (Expenses expense : expensesQueue) {
+            if (expense instanceof SupplyExpenses) {
+                SupplyExpenses newExpense = new SupplyExpenses(expense.getDocument(), expense.getDetail(), expense.getValue());
+                expensesQueueClone.enqueue(newExpense);
+            }
+        }
+
+        // Cloning the Expenses Heap
+        ArrayList<Expenses> expensesHeapToClone = expensesPriorityQueue.getElements();
+        MaxHeap<Expenses> expensesHeapClone = new MaxHeap<>();
+        for (Expenses expense : expensesHeapToClone) {
+            if (expense instanceof OperationExpenses) {
+                OperationExpenses newExpense = new OperationExpenses(expense.getDocument(), expense.getDetail(), expense.getValue());
+                expensesHeapClone.insert(newExpense);
+            }
+        }
+
+        expensesDoublyStack.push(expensesQueueClone);
+        expensesMaxHeapStack.push(expensesHeapClone);
     }
 
     /**
@@ -104,8 +133,12 @@ public class Controller {
     public void loadFromStacks(){
         DoublyLinkedList<Entry> loadedQueue = doublyStack.pop();
         MaxHeap<Entry> loadedHeap =  maxHeapStack.pop();
+        DoublyLinkedList<Expenses> loadedExpensesQueue = expensesDoublyStack.pop();
+        MaxHeap<Expenses> loadedExpensesHeap = expensesMaxHeapStack.pop();
         setQueue(loadedQueue);
         setPriorityQueue(loadedHeap);
+        setExpensesQueue(loadedExpensesQueue);
+        setExpensesPriorityQueue(loadedExpensesHeap);
 
         // Add the elements of the DoublyLinkedList to the HasTable
         HashTable<String,Entry> loadedTable = new HashTable<>();
@@ -121,6 +154,22 @@ public class Controller {
 
         // Add the HashTable to the new Controller
         setTable(loadedTable);
+
+        // Add the elements of the Expenses DoublyLinkedList to the Expenses HasTable
+        HashTable<String,Expenses> loadedExpensesTable = new HashTable<>();
+
+        for (Expenses expense : loadedExpensesQueue) {
+            loadedExpensesTable.add(expense.getDocument(), expense);
+        }
+
+        // Add the elements of the Expenses MaxHeap to the Expenses HasTable
+        for (Expenses expense : loadedExpensesHeap.getElements()) {
+            loadedExpensesTable.add(expense.getDocument(), expense);
+        }
+
+        setExpensesTable(loadedExpensesTable);
+
+
     }
 
     public boolean modifyCreditSale(String ID, int option, String newValue){
@@ -305,6 +354,236 @@ public class Controller {
 
     }
 
+    // Add these methods to your Controller class
+
+    public void addOtherEntry(String ID, String document, String detail, double value) {
+        boolean flag = false;
+        if (!table.containsKey(ID)) {
+            saveToStacks();
+            OtherEntries newEntry = new OtherEntries(document, detail, value, ID);
+            table.add(newEntry.getID(), newEntry);
+            queue.enqueue(newEntry);
+            flag = true;
+        }
+        saveData();
+    }
+
+    public boolean modifyOtherEntry(String ID, int option, String newValue) {
+        boolean flag = false;
+        Entry entry = table.get(ID);
+        if (entry instanceof OtherEntries) {
+            saveToStacks();
+            switch (option) {
+                case 1:
+                    ((OtherEntries) entry).setDetail(newValue);
+                    flag = true;
+                    break;
+                case 2:
+                    ((OtherEntries) entry).setDocument(newValue);
+                    flag = true;
+                    break;
+                case 3:
+                    ((OtherEntries) entry).setValue(Double.parseDouble(newValue));
+                    flag = true;
+                    break;
+            }
+        }
+        saveData();
+        return flag;
+    }
+
+    public boolean removeOtherEntry(String ID) {
+        boolean flag = false;
+        if (table.containsKey(ID)) {
+            saveToStacks();
+            Entry entryToRemove = table.get(ID);
+            if (entryToRemove instanceof OtherEntries) {
+                flag = removeFromQueue(ID);
+            }
+            table.remove(ID);
+        }
+        saveData();
+        return flag;
+    }
+
+    public ArrayList<OtherEntries> getOtherEntries() {
+        ArrayList<OtherEntries> otherEntriesList = new ArrayList<>();
+        for (Entry entry : queue) {
+            if (entry instanceof OtherEntries) {
+                otherEntriesList.add((OtherEntries) entry);
+            }
+        }
+        return otherEntriesList;
+    }
+
+    public OtherEntries getOtherEntry(String ID) {
+        return (OtherEntries) table.get(ID);
+    }
+
+    public void addExpense(String document, String detail, double value, boolean operationExpense) {
+        boolean flag = false;
+        String ID = document;
+        if (!expensesTable.containsKey(ID)) {
+            saveToStacks();
+            if (operationExpense) {
+                OperationExpenses newExpense = new OperationExpenses(document, detail, value);
+                expensesTable.add(newExpense.getDocument(), newExpense);
+                expensesQueue.enqueue(newExpense);
+                expensesPriorityQueue.insert(newExpense);
+            } else {
+                SupplyExpenses newExpense = new SupplyExpenses(document, detail, value);
+                expensesTable.add(newExpense.getDocument(), newExpense);
+                expensesQueue.enqueue(newExpense);
+                expensesPriorityQueue.insert(newExpense);
+            }
+            flag = true;
+        }
+        saveData();
+    }
+
+    public boolean modifyExpense(String ID, int option, String newValue) {
+        boolean flag = false;
+        Expenses expense = expensesTable.get(ID);
+        if (expense != null) {
+            saveToStacks();
+            switch (option) {
+                case 1:
+                    expense.setDetail(newValue);
+                    flag = true;
+                    break;
+                case 2:
+                    expense.setDocument(newValue);
+                    flag = true;
+                    break;
+                case 3:
+                    expense.setValue(Double.parseDouble(newValue));
+                    flag = true;
+                    break;
+            }
+        }
+        saveData();
+        return flag;
+    }
+
+    public boolean removeExpense(String ID) {
+        boolean flag = false;
+        if (expensesTable.containsKey(ID)) {
+            saveToStacks();
+            Expenses expenseToRemove = expensesTable.get(ID);
+            if (expenseToRemove != null) {
+                flag = removeFromQueue(ID);
+            }
+            expensesTable.remove(ID);
+        }
+        saveData();
+        return flag;
+    }
+
+    public ArrayList<Expenses> getExpenses() {
+        ArrayList<Expenses> expensesList = new ArrayList<>();
+        for (Expenses expense : expensesQueue) {
+            if (expense instanceof Expenses) {
+                expensesList.add((Expenses) expense);
+            }
+        }
+        return expensesList;
+    }
+
+    public Expenses getExpense(String ID) {
+        return expensesTable.get(ID);
+    }
+
+    public ArrayList<ArrayList<String>> getExpensesAttributes(boolean operationExpense) {
+        ArrayList<ArrayList<String>> list = new ArrayList<>();
+        for (Expenses expense : expensesQueue) {
+            if (operationExpense && expense instanceof OperationExpenses) {
+                list.add(expense.getAttributes());
+            } else if (!operationExpense && expense instanceof SupplyExpenses) {
+                list.add(expense.getAttributes());
+            }
+        }
+        return list;
+    }
+
+    public void addOtherExpense(String document, String detail, double value) {
+        boolean flag = false;
+        String ID = document;
+        if (!expensesTable.containsKey(ID)) {
+            saveToStacks();
+            OtherExpenses newExpense = new OtherExpenses(document, detail, value);
+            expensesTable.add(newExpense.getDocument(), newExpense);
+            expensesQueue.enqueue(newExpense);
+            expensesPriorityQueue.insert(newExpense);
+            flag = true;
+        }
+        saveData();
+    }
+
+    public boolean modifyOtherExpense(String ID, int option, String newValue) {
+        boolean flag = false;
+        Expenses expense = expensesTable.get(ID);
+        if (expense != null) {
+            saveToStacks();
+            switch (option) {
+                case 1:
+                    expense.setDetail(newValue);
+                    flag = true;
+                    break;
+                case 2:
+                    expense.setDocument(newValue);
+                    flag = true;
+                    break;
+                case 3:
+                    expense.setValue(Double.parseDouble(newValue));
+                    flag = true;
+                    break;
+            }
+        }
+        saveData();
+        return flag;
+    }
+
+    public boolean removeOtherExpense(String ID) {
+        boolean flag = false;
+        if (expensesTable.containsKey(ID)) {
+            saveToStacks();
+            Expenses expenseToRemove = expensesTable.get(ID);
+            if (expenseToRemove != null) {
+                flag = removeFromQueue(ID);
+            }
+            expensesTable.remove(ID);
+        }
+        saveData();
+        return flag;
+    }
+
+    public ArrayList<OtherExpenses> getOtherExpenses() {
+        ArrayList<OtherExpenses> expensesList = new ArrayList<>();
+        for (Expenses expense : expensesQueue) {
+            if (expense instanceof OtherExpenses) {
+                expensesList.add((OtherExpenses) expense);
+            }
+        }
+        return expensesList;
+    }
+
+    public OtherExpenses getOtherExpense(String ID) {
+        return (OtherExpenses) expensesTable.get(ID);
+    }
+
+    public ArrayList<ArrayList<String>> getOtherExpensesAttributes() {
+        ArrayList<ArrayList<String>> list = new ArrayList<>();
+        for (Expenses expense : expensesQueue) {
+            if (expense instanceof OtherExpenses) {
+                list.add(expense.getAttributes());
+            }
+        }
+        return list;
+    }
+
+
+
+
 
     /**
      * Copies a list of tasks.
@@ -354,6 +633,18 @@ public class Controller {
         this.priorityQueue = priorityQueue;
     }
 
+    public void setExpensesTable(HashTable<String, Expenses> expensesTable) {
+        this.expensesTable = expensesTable;
+    }
+
+    public void setExpensesQueue(DoublyLinkedList<Expenses> expensesQueue) {
+        this.expensesQueue = expensesQueue;
+    }
+
+    public void setExpensesPriorityQueue(MaxHeap<Expenses> expensesPriorityQueue) {
+        this.expensesPriorityQueue = expensesPriorityQueue;
+    }
+
     public DoublyLinkedList<Entry> getQueue() {
         return queue;
     }
@@ -397,6 +688,15 @@ public class Controller {
     public InmediateSales getInmediateSale(String ID){
         return (InmediateSales) table.get(ID);
     }
+
+    public SupplyExpenses getSupplyExpense(String ID) {
+        return (SupplyExpenses) expensesTable.get(ID);
+    }
+
+    public OperationExpenses getOperationExpense(String ID) {
+        return (OperationExpenses) expensesTable.get(ID);
+    }
+
 
     public String generateID(){
         // Generate a random number
