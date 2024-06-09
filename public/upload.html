@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Cargar Archivo - AplanchadosConAmor</title>
+</head>
+<body>
+    <header>
+        <h1>Cargar Archivo Excel</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="transactions.html">Transacciones</a></li>
+                <li><a href="summaries.html">Resúmenes</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Subir Archivo de Transacciones</h2>
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" id="file" accept=".xlsx" required>
+            <button type="submit">Subir</button>
+        </form>
+        <div id="upload-result"></div>
+    </main>
+    <footer>
+        <p>&copy; 2024 AplanchadosConAmor</p>
+    </footer>
+    <script src="js/upload.js"></script>
+</body>
+</html>

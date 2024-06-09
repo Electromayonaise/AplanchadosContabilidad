@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Resúmenes - AplanchadosConAmor</title>
+</head>
+<body>
+    <header>
+        <h1>Resúmenes</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="transactions.html">Transacciones</a></li>
+                <li><a href="upload.html">Cargar Archivo</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Resúmenes Diarios</h2>
+        <form id="summary-form">
+            <input type="number" id="initialBalance" placeholder="Saldo Inicial" required>
+            <input type="number" id="finalBalance" placeholder="Saldo Final" required>
+            <input type="number" id="totalIncome" placeholder="Total Ingresos" required>
+            <input type="number" id="totalExpenses" placeholder="Total Egresos" required>
+            <input type="number" id="managementAmount" placeholder="Monto de Gestión" required>
+            <input type="number" id="netBalance" placeholder="Saldo Neto" required>
+            <input type="date" id="date" required>
+            <button type="submit">Registrar</button>
+        </form>
+        <h3>Resúmenes Registrados</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Saldo Inicial</th>
+                    <th>Saldo Final</th>
+                    <th>Total Ingresos</th>
+                    <th>Total Egresos</th>
+                    <th>Monto de Gestión</th>
+                    <th>Saldo Neto</th>
+                </tr>
+            </thead>
+            <tbody id="summaries-table-body">
+                <!-- Resúmenes serán cargados aquí -->
+            </tbody>
+        </table>
+    </main>
+    <footer>
+        <p>&copy; 2024 AplanchadosConAmor</p>
+    </footer>
+    <script src="js/summaries.js"></script>
+</body>
+</html>

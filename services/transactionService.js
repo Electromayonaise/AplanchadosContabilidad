@@ -1,0 +1,3 @@
+const Transaction = require('../models/transaction');
+
+// Service methods to handle business logic related to transactions...

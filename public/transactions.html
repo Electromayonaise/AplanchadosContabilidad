@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Transacciones - AplanchadosConAmor</title>
+</head>
+<body>
+    <header>
+        <h1>Transacciones</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="summaries.html">Resúmenes</a></li>
+                <li><a href="upload.html">Cargar Archivo</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Registro de Transacciones</h2>
+        <form id="transaction-form">
+            <input type="text" id="document" placeholder="Documento" required>
+            <input type="text" id="clientName" placeholder="Nombre del Cliente" required>
+            <input type="text" id="paymentType" placeholder="Tipo de Pago" required>
+            <input type="text" id="paymentMethod" placeholder="Método de Pago" required>
+            <input type="number" id="amount" placeholder="Valor" required>
+            <input type="date" id="date" required>
+            <input type="text" id="detail" placeholder="Detalle" required>
+            <button type="submit">Registrar</button>
+        </form>
+        <h3>Transacciones Registradas</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre del Cliente</th>
+                    <th>Tipo de Pago</th>
+                    <th>Método de Pago</th>
+                    <th>Valor</th>
+                    <th>Fecha</th>
+                    <th>Detalle</th>
+                    <th>Tipo</th>
+                </tr>
+            </thead>
+            <tbody id="transactions-table-body">
+                <!-- Transacciones serán cargadas aquí -->
+            </tbody>
+        </table>
+    </main>
+    <footer>
+        <p>&copy; 2024 AplanchadosConAmor</p>
+    </footer>
+    <script src="js/transactions.js"></script>
+</body>
+</html>
